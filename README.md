@@ -5,7 +5,7 @@ This platform serves as the source of truth for the local artisan and repair ser
 
 ### Architecture
 - **Backend & Web**: Laravel (PHP) acting as the main REST API and rendering basic base views using Blade.
-- **Database**: Oracle SQL+ to manage robust relational data across `Users`, `Artisans`, and `Bookings` components. Connection to Laravel handled using `yajra/laravel-oci8` or similar configuration.
+- **Database**: Oracle SQL+ to manage robust relational data across `Users`, `Artisans` (including `cover_image_path`), and `Bookings` (including `description` and `image_path` for repair issues). Connection to Laravel handled using `yajra/laravel-oci8`. Eloquent Models and Migrations map directly to this schema.
 - **Mobile (Phase 2)**: To be implemented in Flutter/Dart, designed to directly consume the Laravel API endpoints.
 
 ## Git Workflow
@@ -38,7 +38,10 @@ For our team of 5, the established Git workflow must be strictly adhered to:
    ```bash
    php artisan key:generate
    ```
-6. Run the local database instantiation script found at `artisan-db-oracle/schema.sql` against your localized Oracle DB instance to set up standard tables.
+6. Instantiate the database tables using the Laravel migrations (Note: this schema is also documented in `artisan-db-oracle/schema.sql`):
+   ```bash
+   php artisan migrate
+   ```
 7. Serve the backend locally:
    ```bash
    php artisan serve
