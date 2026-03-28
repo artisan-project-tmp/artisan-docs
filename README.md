@@ -1,67 +1,110 @@
-# BricoLink Service Booking
+# Artisan Service Booking Platform - System Documentation
 
-## Project Overview
-This platform serves as the source of truth for the local artisan and repair service booking system. It is composed of a single REST API base serving web, and eventually a Phase 2 Flutter application.
+## 1. Project Overview
+This repository contains the documentation and source code for the Artisan Service Booking Platform. The platform serves as a centralized hub connecting local artisans and repair professionals with clients. It is built as a monolithic web application utilizing a RESTful architecture, preparing for future expansion into mobile clients.
 
-### Architecture
-- **Backend & Web**: Laravel (PHP) acting as the main REST API and rendering fully custom, authentic Tailwind CSS interfaces via Blade and Vite for our Artisan Platform.
-- **Database**: MySQL to manage robust relational data across `Users`, `Artisans` (including `cover_image_path`), and `Bookings` (including `description` and `image_path` for repair issues). Eloquent Models and Migrations map directly to this schema.
-- **Mobile (Phase 2)**: To be implemented in Flutter/Dart, designed to directly consume the Laravel API endpoints.
+### Architecture Summary
+- **Backend & API**: Laravel (PHP) handles the core business logic, routing, and access control. 
+- **Frontend**: Blade templating engine combined with custom CSS provides the user interface. We consciously avoided heavy CSS frameworks for the initial phase to maintain granular control over the design and ensure a deep understanding of the styling architecture.
+- **Database**: Currently utilizing SQLite for rapid prototyping and local development convenience. The production target is MySQL. Eloquent Models and Schema Migrations are used to ensure a smooth transition between database drivers.
 
-## Git Workflow
-For our team of 5, the established Git workflow must be strictly adhered to:
-1. **Never commit directly to `main`**. The `main` branch is locked for direct pushes.
-2. **Use Feature Branches**: Check out a new branch for each individual task or feature (e.g., `feature/user-auth`, `fix/routing-error`).
-3. **Mandatory Pull Requests (PRs)**: All changes must be integrated into `main` solely through Pull Requests requiring peer review.
+## 2. Development Report (Latest Sprint)
+During the last two days of development, the team focused on establishing the core infrastructure and implementing the primary booking pipeline. Below is a detailed technical summary of the completed features.
 
-## Setup Instructions (Fedora Linux / Global)
+### 2.1 Core Infrastructure Setup
+We successfully scaffolded the Laravel application and established the Model-View-Controller (MVC) structure. Routing is configured for web functionality, and the basic directory structure is populated.
+
+### 2.2 Database Configuration Strategy
+For this phase of development, we implemented **SQLite**. 
+- **Rationale**: SQLite is file-based and requires no separate server processes. This allows all team members to pull the repository and immediately run the project without spending time diagnosing local database server conflicts. 
+- **Future Migration**: Since we have strictly adhered to using Laravel's database migrations and Eloquent ORM rather than raw SQL queries, our codebase is largely database-agnostic. We plan to transition to **MySQL** in a future sprint to support better concurrent database connections and overall production readiness. 
+
+### 2.3 The Dual-Approval Booking Pipeline
+A significant portion of the sprint was dedicated to the booking negotiation system. This logic was designed to protect both the client and the artisan through a mutual agreement protocol:
+1. **Initiation**: Clients browse artisan profiles and submit a service request, detailing the problem, location, and desired date.
+2. **State Management**: The request defaults to a `pending` state. Anti-spam logic prevents a client from submitting duplicate requests to the same artisan.
+3. **Artisan Review & Bidding**: The artisan views the request on their dashboard. They have the option to reject it or accept it. If accepting, the artisan must define the "Final Terms", which explicitly sets the agreed price and any conditional requirements for the job.
+4. **Client Confirmation**: The client reviews the final terms proposed by the artisan. The booking is only confirmed and moved to an active state if the client explicitly approves these terms.
+
+### 2.4 Artisan Dashboard & Job Management
+We implemented a status-based management interface for artisans to track their workload:
+- **Pending Requests**: Inbound quotes requiring attention.
+- **Active Jobs**: Bookings that have been mutually agreed upon and are currently in progress.
+- **Completed**: Historical record of finalized work.
+This acts similarly to a Kanban board, organizing tasks purely by their database status column, specifically in the `artisan.dashboard` view.
+
+### 2.5 Portfolios and Rating System
+- **Portfolio Images**: Created a mechanism for artisans to upload local files representing their previous work. These images are linked to the artisan's profile via the `PortfolioImage` model and stored in the local storage directory.
+- **Post-Completion Ratings**: Implemented a feedback loop where clients can rate artisans out of 5 stars once a job is marked completed. This data is aggregated to calculate the artisan's overall platform score.
+
+## 3. Local Environment Setup Guide
+To ensure consistency across the team, follow these instructions to configure your local development environment.
 
 ### Prerequisites
-1. Ensure the required PHP CLI extensions and web server dependencies are installed:
-   ```bash
-   sudo dnf install php php-cli php-fpm php-mbstring php-xml php-json php-zip php-curl php-mysqlnd mysql-server
-   ```
-2. **Node.js**: Ensure Node.js and NPM are installed to compile the Tailwind CSS frontend.
+- PHP 8.1 or higher
+- Composer
+- Node.js and NPM
+- Git
 
-### Local Environment Getting Started
-1. Clone the necessary repositories into your workspace.
-2. Inside the `artisan-backend-laravel` directory, install PHP dependencies:
+### Installation Steps
+
+1. **Repository Access**
+   Clone the repository to your local workspace and navigate into the backend directory.
+   ```bash
+   git clone <repository-url>
+   cd artisan-backend-laravel
+   ```
+
+2. **Dependency Installation**
+   Install the necessary PHP and JavaScript packages.
    ```bash
    composer install
-   ```
-3. Install Node dependencies:
-   ```bash
    npm install
    ```
-4. Copy the example environment variable file:
+
+3. **Environment Configuration**
+   Copy the example environment file.
    ```bash
    cp .env.example .env
    ```
-5. Configure your `.env` file with the BricoLink environment settings:
-   - Change the app name: `APP_NAME=BricoLink`
-   - Configure your local MySQL database credentials:
-     ```env
-     DB_CONNECTION=mysql
-     DB_HOST=127.0.0.1
-     DB_PORT=3306
-     DB_DATABASE=artisan_project
-     DB_USERNAME=root
-     DB_PASSWORD=
-     ```
-6. Generate the local application key:
-   ```bash
-   php artisan key:generate
+   Open the `.env` file and modify the database variables to use SQLite. Ensure the configuration looks exactly like this:
+   ```env
+   APP_NAME=ArtisanPlatform
+   DB_CONNECTION=sqlite
    ```
-7. Instantiate the database tables using the Laravel migrations:
+   *(Important: Remove or comment out DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, and DB_PASSWORD)*
+
+4. **Database Initialization**
+   Create the physical SQLite file and run the migrations to construct the schema based on our Laravel migration files.
    ```bash
+   touch database/database.sqlite
    php artisan migrate
    ```
-8. Build the frontend assets (Tailwind CSS and JavaScript) via Vite:
+   *(Windows CMD users: use `echo > database\database.sqlite` instead of `touch`)*
+
+5. **Storage Linkage**
+   To make user-uploaded portfolio images securely accessible from the web directory, create a symbolic link:
    ```bash
-   npm run build
+   php artisan storage:link
    ```
-   *(Alternatively, run `npm run dev` in a separate terminal during development).*
-9. Serve the backend locally:
+
+6. **Application Execution**
+   You must run two separate server instances concurrently to handle the backend processing and frontend asset serving.
+   
+   **Terminal 1 (PHP Development Server):**
    ```bash
    php artisan serve
    ```
+   
+   **Terminal 2 (Frontend Asset Compilation):**
+   ```bash
+   npm run dev
+   ```
+   
+   Access the application at `http://localhost:8000`.
+
+## 4. Git Collaboration Workflow
+To prevent integration conflicts, the team must adhere to the following version control protocols:
+1. The `main` branch is protected. Direct commits are strictly prohibited.
+2. Development must occur on distinct feature branches (e.g., `feature/booking-system`, `fix/login-routing`).
+3. Code is merged into `main` exclusively via Pull Requests, which require at least one peer review before integration.
