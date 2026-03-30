@@ -87,8 +87,13 @@ To ensure consistency across the team, follow these instructions to configure yo
    ```bash
    php artisan storage:link
    ```
-
-6. **Application Execution**
+6. **Generate the Application Key**
+   Once your .env file is in place, you need to tell Laravel to generate a unique random key and automatically insert it into the file.
+   ```bash
+   php artisan key:generate
+   ```
+   *You should see a message saying "Application key set successfully."*
+8. **Application Execution**
    You must run two separate server instances concurrently to handle the backend processing and frontend asset serving.
    
    **Terminal 1 (PHP Development Server):**
