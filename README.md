@@ -1,7 +1,7 @@
-# Artisan Service Booking Platform - System Documentation
+# BricoLink Service Booking Platform - System Documentation
 
 ## 1. Project Overview
-This repository contains the documentation and source code for the Artisan Service Booking Platform. The platform serves as a centralized hub connecting local artisans and repair professionals with clients. It is built as a monolithic web application utilizing a RESTful architecture, preparing for future expansion into mobile clients.
+This repository contains the documentation and source code for the BricoLink Service Booking Platform. The platform serves as a centralized hub connecting local artisans and repair professionals with clients. It is built as a monolithic web application utilizing a RESTful architecture, preparing for future expansion into mobile clients.
 
 ### Architecture Summary
 - **Backend & API**: Laravel (PHP) handles the core business logic, routing, and access control. 
@@ -52,7 +52,7 @@ To ensure consistency across the team, follow these instructions to configure yo
    Clone the repository to your local workspace and navigate into the backend directory.
    ```bash
    git clone <repository-url>
-   cd artisan-backend-laravel
+   cd bricolink-laravel
    ```
 
 2. **Dependency Installation**
@@ -69,7 +69,7 @@ To ensure consistency across the team, follow these instructions to configure yo
    ```
    Open the `.env` file and modify the database variables to use SQLite. Ensure the configuration looks exactly like this:
    ```env
-   APP_NAME=ArtisanPlatform
+   APP_NAME=BricoLinkPlatform
    DB_CONNECTION=sqlite
    ```
    *(Important: Remove or comment out DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, and DB_PASSWORD)*
